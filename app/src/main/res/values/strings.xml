@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CameraFeature</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="res_folder_check">not found</string>
+</resources>
