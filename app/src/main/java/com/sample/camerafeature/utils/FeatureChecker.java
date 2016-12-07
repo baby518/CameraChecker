@@ -3,7 +3,6 @@ package com.sample.camerafeature.utils;
 import android.content.Context;
 import android.os.Build;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.sample.camerafeature.R;
@@ -79,12 +78,12 @@ public class FeatureChecker {
     }
 
     public static void initialize(Context context) {
+        if (isInitialized()) return;
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         sDensity = displayMetrics.density;
         sDensityDpi = displayMetrics.densityDpi;
-        Log.d("zczc", "zczc FeatureChecker  --> initialize " + displayMetrics);
         sScreenWidthLong = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         sScreenWidthShort = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
         sResFolderCheck = context.getString(R.string.res_folder_check);
