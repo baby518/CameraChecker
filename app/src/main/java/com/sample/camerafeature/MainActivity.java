@@ -12,13 +12,15 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
 
 import com.sample.camerafeature.fragment.OverviewFragment;
-import com.sample.camerafeature.utils.FeatureChecker;
+import com.sample.camerafeature.utils.PreferenceUtil;
 
 public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -52,6 +54,36 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        boolean isChecked = PreferenceUtil.getBoolean(this, PreferenceUtil.KEY_USE_CAMERA2, false);
+        MenuItem item = menu.findItem(R.id.action_use_camera2);
+        if (item != null) {
+            item.setChecked(isChecked);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item != null) {
+            if (item.isCheckable()) {
+                item.setChecked(!item.isChecked());
+            }
+
+            int id = item.getItemId();
+            if (id == R.id.action_use_camera2) {
+                PreferenceUtil.putBoolean(this, PreferenceUtil.KEY_USE_CAMERA2, item.isChecked());
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static class PlaceholderFragment extends Fragment {

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import com.sample.camerafeature.R;
 import com.sample.camerafeature.fragment.BaseCapabilitiesContent.CapabilitiesItem;
-import com.sample.camerafeature.utils.FeatureChecker;
 
 public class BaseFragment extends ListFragment {
     public final String NA = "N/A";
@@ -24,7 +23,6 @@ public class BaseFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle paramBundle) {
         super.onActivityCreated(paramBundle);
-        FeatureChecker.initialize(getActivity());
         initCapabilities();
         setMyListAdapter();
     }
