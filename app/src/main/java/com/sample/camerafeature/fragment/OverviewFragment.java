@@ -1,24 +1,19 @@
 package com.sample.camerafeature.fragment;
 
-import android.os.Bundle;
+import android.content.Context;
 
 import com.sample.camerafeature.utils.FeatureChecker;
 
 public class OverviewFragment extends BaseFragment {
-    public static String getName() {
+    @Override
+    public String getName() {
         return "Overview";
     }
 
     @Override
-    public void onActivityCreated(Bundle paramBundle) {
-        FeatureChecker.initialize(getActivity());
-        super.onActivityCreated(paramBundle);
-    }
-
     public void initCapabilities() {
-        super.initCapabilities();
-        this.mCapabilitiesContent = new OverviewCapabilitiesContent(getContext());
-        this.mCapabilitiesContent.clearCameraCapabilities();
-        this.mCapabilitiesContent.generateCapabilities();
+        Context context = getContext();
+        FeatureChecker.initialize(context);
+        mCapabilities = new OverviewCapabilities(context);
     }
 }

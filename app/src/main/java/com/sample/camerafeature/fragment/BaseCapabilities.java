@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class BaseCapabilitiesContent {
+public abstract class BaseCapabilities {
     public static String SUPPORTED = "supported";
     public static String UNSUPPORTED = "unsupported";
+    public static final String UNKNOWN = "unknown";
     private List<CapabilitiesItem> ITEMS = new ArrayList<>();
 
     public void addItem(CapabilitiesItem item) {
@@ -17,8 +18,7 @@ public class BaseCapabilitiesContent {
         this.ITEMS.clear();
     }
 
-    public void generateCapabilities() {
-    }
+    protected abstract void generateCapabilities();
 
     public CapabilitiesItem getItemAt(int index) {
         return this.ITEMS.get(index);

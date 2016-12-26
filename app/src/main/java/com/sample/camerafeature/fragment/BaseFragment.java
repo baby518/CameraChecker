@@ -12,33 +12,31 @@ import java.util.List;
 import java.util.Map;
 
 import com.sample.camerafeature.R;
-import com.sample.camerafeature.fragment.BaseCapabilitiesContent.CapabilitiesItem;
+import com.sample.camerafeature.fragment.BaseCapabilities.CapabilitiesItem;
 
-public class BaseFragment extends ListFragment {
+public abstract class BaseFragment extends ListFragment {
     public final String NA = "N/A";
-    public BaseCapabilitiesContent mCapabilitiesContent;
-
-    public BaseFragment() {}
+    public BaseCapabilities mCapabilities;
 
     @Override
-    public void onActivityCreated(Bundle paramBundle) {
+    public final void onActivityCreated(Bundle paramBundle) {
         super.onActivityCreated(paramBundle);
         initCapabilities();
         setMyListAdapter();
     }
 
-    public static String getName() {
+    public String getName() {
         return "";
     }
 
-    public void initCapabilities() {
-    }
+    public abstract void initCapabilities();
     
     public List<Map<String, Object>> getSimpleData() {
-        List localList = this.mCapabilitiesContent.getItems();
-        int size = localList.size();
         ArrayList resultList = new ArrayList();
-        if (this.mCapabilitiesContent != null) {
+        if (mCapabilities == null) return resultList;
+        List localList = mCapabilities.getItems();
+        int size = localList.size();
+        if (this.mCapabilities != null) {
             for (int i = 0; i < size; i++) {
                 CapabilitiesItem item = (CapabilitiesItem) localList.get(i);
                 HashMap localHashMap = new HashMap();
@@ -53,7 +51,7 @@ public class BaseFragment extends ListFragment {
     public void onListItemClick(ListView paramListView, View paramView, int paramInt,
             long paramLong) {
 //        super.onListItemClick(paramListView, paramView, paramInt, paramLong);
-//        paramView = (BaseCapabilitiesContent.CapabilitiesItem) this.mCapabilitiesContent.getItems()
+//        paramView = (BaseCapabilities.CapabilitiesItem) this.mCapabilities.getItems()
 //                .get(paramInt);
 //        localObject = new AlertDialog.Builder(getActivity());
 //        if (paramView.getContentList() != null) {
@@ -68,7 +66,7 @@ public class BaseFragment extends ListFragment {
 //        }
     }
 
-    public void setMyListAdapter() {
+    private void setMyListAdapter() {
         setListAdapter(new SimpleAdapter(getActivity(), getSimpleData(),
                 R.layout.simple_list_item, new String[] {
                         "title", "content"
