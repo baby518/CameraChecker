@@ -1,5 +1,6 @@
 package com.sample.camerafeature.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -17,6 +18,11 @@ import com.sample.camerafeature.fragment.BaseCapabilities.CapabilitiesItem;
 public abstract class BaseFragment extends ListFragment {
     public final String NA = "N/A";
     public BaseCapabilities mCapabilities;
+    protected boolean mUseApi2 = false;
+
+    protected void init(boolean api2) {
+        mUseApi2 = api2;
+    }
 
     @Override
     public final void onActivityCreated(Bundle paramBundle) {
@@ -67,11 +73,25 @@ public abstract class BaseFragment extends ListFragment {
     }
 
     private void setMyListAdapter() {
-        setListAdapter(new SimpleAdapter(getActivity(), getSimpleData(),
+        Context context = getContext();
+        if (context == null) return;
+        setListAdapter(new SimpleAdapter(context, getSimpleData(),
                 R.layout.simple_list_item, new String[] {
                         "title", "content"
                 }, new int[] {
                         R.id.text1, R.id.text2
                 }));
+    }
+
+    public void onApiLevelChanged() {
+        initCapabilities();
+        setMyListAdapter();
+    }
+
+    public final void setApi2(boolean api2) {
+        if (mUseApi2 != api2) {
+            mUseApi2 = api2;
+            onApiLevelChanged();
+        }
     }
 }

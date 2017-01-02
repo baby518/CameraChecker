@@ -1,22 +1,17 @@
 package com.sample.camerafeature.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 
 public class CameraInfoFragment extends BaseFragment {
     public static final String CAMERA_ID = "camera_id";
-    private int mCameraId;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    public static CameraInfoFragment newInstance(int cameraId) {
+    public static CameraInfoFragment newInstance(int cameraId, boolean api2) {
         CameraInfoFragment fragment = new CameraInfoFragment();
         Bundle args = new Bundle();
         args.putInt(CAMERA_ID, cameraId);
         fragment.setArguments(args);
+        fragment.init(api2);
         return fragment;
     }
 
@@ -32,6 +27,8 @@ public class CameraInfoFragment extends BaseFragment {
         if (bundle == null) return;
 
         int id = bundle.getInt(CAMERA_ID);
-        mCapabilities = new CameraCapabilities(id);
+        Context context = getContext();
+        if (context == null) return;
+        mCapabilities = mUseApi2 ? new Camera2Capabilities(context, id) : new CameraCapabilities(context, id);
     }
 }

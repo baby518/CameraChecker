@@ -1,6 +1,10 @@
 package com.sample.camerafeature;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +16,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,12 +24,14 @@ import android.view.View;
 import com.sample.camerafeature.fragment.BaseFragment;
 import com.sample.camerafeature.fragment.CameraInfoFragment;
 import com.sample.camerafeature.fragment.OverviewFragment;
-import com.sample.camerafeature.utils.PreferenceUtil;
+import com.sample.camerafeature.utils.PreferenceManager;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private PreferenceManager mPreferenceManager;
+    private boolean mUseCameraApi2 = false;
 
     private ViewPager mViewPager;
 
@@ -33,16 +40,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initPreferenceManager();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        initSectionsPagerAdapter(mUseCameraApi2);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -57,12 +63,42 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initPreferenceManager() {
+        mPreferenceManager = new PreferenceManager(this);
+        mPreferenceManager.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (PreferenceManager.KEY_USE_CAMERA2.equals(key)) {
+                    boolean api2 = sharedPreferences.getBoolean(PreferenceManager.KEY_USE_CAMERA2, false);
+                    if (mUseCameraApi2 != api2) {
+                        mUseCameraApi2 = api2;
+                        reloadSectionsPagerAdapter(mUseCameraApi2);
+                    }
+                }
+            }
+        });
+        mUseCameraApi2 = mPreferenceManager.getBoolean(PreferenceManager.KEY_USE_CAMERA2, false);
+    }
+
+    private void initSectionsPagerAdapter(boolean api2) {
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), api2);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
+
+    private void reloadSectionsPagerAdapter(boolean api2) {
+        if (mSectionsPagerAdapter != null) {
+            mSectionsPagerAdapter.changeToApi2(api2);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        boolean isChecked = PreferenceUtil.getBoolean(this, PreferenceUtil.KEY_USE_CAMERA2, false);
+        boolean isChecked = mUseCameraApi2;
         MenuItem item = menu.findItem(R.id.action_use_camera2);
         if (item != null) {
             item.setChecked(isChecked);
@@ -80,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
             int id = item.getItemId();
             if (id == R.id.action_use_camera2) {
-                PreferenceUtil.putBoolean(this, PreferenceUtil.KEY_USE_CAMERA2, item.isChecked());
+                mPreferenceManager.putBoolean(PreferenceManager.KEY_USE_CAMERA2, item.isChecked());
                 return true;
             }
         }
@@ -88,14 +124,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private CameraManager mCameraManager;
         private ArrayList<BaseFragment> fragmentList = new ArrayList<>();
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public SectionsPagerAdapter(FragmentManager fm, boolean api2) {
             super(fm);
-            fragmentList.add(new OverviewFragment());
-            int num = Camera.getNumberOfCameras();
+            fragmentList.add(OverviewFragment.newInstance(api2));
+            int num = 0;
+            if (api2) {
+                mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+                try {
+                    num = mCameraManager.getCameraIdList().length;
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                num = Camera.getNumberOfCameras();
+            }
             for (int i = 0; i < num; i++) {
-                fragmentList.add(CameraInfoFragment.newInstance(i));
+                CameraInfoFragment fragment = CameraInfoFragment.newInstance(i, api2);
+                fragmentList.add(fragment);
+            }
+        }
+
+        public void changeToApi2(boolean api2) {
+            if (fragmentList != null) {
+                for (BaseFragment fragment : fragmentList) {
+                    fragment.setApi2(api2);
+                }
             }
         }
 

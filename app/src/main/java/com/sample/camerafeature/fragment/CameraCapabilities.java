@@ -1,11 +1,12 @@
 package com.sample.camerafeature.fragment;
 
+import android.content.Context;
 import android.hardware.Camera;
 
 public class CameraCapabilities extends BaseCapabilities {
     private int mCameraId;
 
-    public CameraCapabilities(int cameraId) {
+    public CameraCapabilities(Context context, int cameraId) {
         mCameraId = cameraId;
 
         clearCameraCapabilities();
