@@ -1,5 +1,6 @@
 package com.sample.camerafeature.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -16,7 +17,6 @@ import com.sample.camerafeature.R;
 import com.sample.camerafeature.fragment.BaseCapabilities.CapabilitiesItem;
 
 public abstract class BaseFragment extends ListFragment {
-    public final String NA = "N/A";
     public BaseCapabilities mCapabilities;
     protected boolean mUseApi2 = false;
 
@@ -37,7 +37,7 @@ public abstract class BaseFragment extends ListFragment {
 
     public abstract void initCapabilities();
     
-    public List<Map<String, Object>> getSimpleData() {
+    private List<Map<String, Object>> getSimpleData() {
         ArrayList resultList = new ArrayList();
         if (mCapabilities == null) return resultList;
         List localList = mCapabilities.getItems();
@@ -54,22 +54,23 @@ public abstract class BaseFragment extends ListFragment {
         return resultList;
     }
 
-    public void onListItemClick(ListView paramListView, View paramView, int paramInt,
-            long paramLong) {
-//        super.onListItemClick(paramListView, paramView, paramInt, paramLong);
-//        paramView = (BaseCapabilities.CapabilitiesItem) this.mCapabilities.getItems()
-//                .get(paramInt);
-//        localObject = new AlertDialog.Builder(getActivity());
-//        if (paramView.getContentList() != null) {
-//            int i = paramView.getContentList().size();
-//            paramListView = new CharSequence[i];
-//            for (paramInt = 0; paramInt < i; paramInt++) {
-//                paramListView[paramInt] = paramView.getContentList().get(paramInt).toString();
-//            }
-//            ((AlertDialog.Builder) localObject).setTitle(paramView.getTitle())
-//                    .setItems(paramListView, null);
-//            ((AlertDialog.Builder) localObject).show();
-//        }
+    public void onListItemClick(ListView listView, View v, int position, long id) {
+        super.onListItemClick(listView, v, position, id);
+
+        CapabilitiesItem item = mCapabilities.getItems().get(position);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        List contentList = item.getContentList();
+        // if content just has 1 element, ignore it.
+        if (contentList != null && contentList.size() > 1) {
+            int size = contentList.size();
+            CharSequence[] items = new CharSequence[size];
+            for (position = 0; position < size; position++) {
+                items[position] = contentList.get(position).toString();
+            }
+            builder.setTitle(item.getTitle());
+            builder.setItems(items, null);
+            builder.show();
+        }
     }
 
     private void setMyListAdapter() {

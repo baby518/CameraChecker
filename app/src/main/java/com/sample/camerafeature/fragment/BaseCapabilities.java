@@ -8,6 +8,7 @@ public abstract class BaseCapabilities {
     public static String SUPPORTED = "supported";
     public static String UNSUPPORTED = "unsupported";
     public static final String UNKNOWN = "unknown";
+    public static final String NA = "N/A";
     private List<CapabilitiesItem> ITEMS = new ArrayList<>();
 
     public void addItem(CapabilitiesItem item) {
@@ -38,18 +39,24 @@ public abstract class BaseCapabilities {
             this.content = content;
         }
 
-        public CapabilitiesItem(List<?> contentList) {
-            this.contentList = contentList;
-        }
-
-        public CapabilitiesItem(Set<?> contentSet) {
-        }
-
-        public CapabilitiesItem(String title, boolean paramBoolean) {
+        public CapabilitiesItem(String title, boolean enable) {
             this.title = title;
+            this.content = enable ? SUPPORTED : UNSUPPORTED;
         }
 
-        public CapabilitiesItem(String title, Object[] paramArrayOfObject) {
+        public CapabilitiesItem(String title, Object[] contentArray) {
+            this.title = title;
+            if (contentArray != null && contentArray.length > 0) {
+                this.content = contentArray[0].toString();
+            }
+        }
+
+        public CapabilitiesItem(String title, List<?> contentList) {
+            this.contentList = contentList;
+            this.title = title;
+            if (this.contentList != null && this.contentList.size() > 0) {
+                this.content = this.contentList.get(0).toString();
+            }
         }
 
         public String getContent() {

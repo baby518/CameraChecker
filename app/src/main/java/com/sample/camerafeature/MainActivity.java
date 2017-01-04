@@ -1,7 +1,6 @@
 package com.sample.camerafeature;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
@@ -16,7 +15,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,18 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initPreferenceManager() {
         mPreferenceManager = new PreferenceManager(this);
-        mPreferenceManager.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (PreferenceManager.KEY_USE_CAMERA2.equals(key)) {
-                    boolean api2 = sharedPreferences.getBoolean(PreferenceManager.KEY_USE_CAMERA2, false);
-                    if (mUseCameraApi2 != api2) {
-                        mUseCameraApi2 = api2;
-                        reloadSectionsPagerAdapter(mUseCameraApi2);
-                    }
-                }
-            }
-        });
         mUseCameraApi2 = mPreferenceManager.getBoolean(PreferenceManager.KEY_USE_CAMERA2, false);
     }
 
@@ -116,11 +102,20 @@ public class MainActivity extends AppCompatActivity {
 
             int id = item.getItemId();
             if (id == R.id.action_use_camera2) {
-                mPreferenceManager.putBoolean(PreferenceManager.KEY_USE_CAMERA2, item.isChecked());
+                onCameraChecked(item);
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void onCameraChecked(MenuItem item) {
+        boolean api2 = item.isChecked();
+        if (mUseCameraApi2 != api2) {
+            mUseCameraApi2 = api2;
+            reloadSectionsPagerAdapter(mUseCameraApi2);
+        }
+        mPreferenceManager.putBoolean(PreferenceManager.KEY_USE_CAMERA2, item.isChecked());
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
