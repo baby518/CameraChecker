@@ -1,7 +1,10 @@
 package com.sample.camerafeature.fragment;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
+
+import com.sample.camerafeature.R;
 
 public class CameraInfoFragment extends BaseFragment {
     public static final String CAMERA_ID = "camera_id";
@@ -16,9 +19,10 @@ public class CameraInfoFragment extends BaseFragment {
     }
 
     @Override
-    public String getName() {
+    public String getName(Resources res) {
         Bundle bundle = getArguments();
-        return "Camera " + (bundle != null ? bundle.getInt(CAMERA_ID) : -1);
+        int cameraId = (bundle != null ? bundle.getInt(CAMERA_ID) : -1);
+        return res.getString(R.string.fragment_title_camera, cameraId);
     }
 
     @Override

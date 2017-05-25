@@ -16,11 +16,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Camera2Capabilities extends BaseCapabilities {
+public class Camera2Capabilities extends BaseCameraCapabilities {
     private String mCameraId;
     private CameraCharacteristics mCharacteristics;
 
     public Camera2Capabilities(Context context, int cameraId) {
+        super(context, cameraId);
         mCameraId = Integer.toString(cameraId);
         mCharacteristics = initCameraManager(context);
         clearCameraCapabilities();
@@ -39,6 +40,10 @@ public class Camera2Capabilities extends BaseCapabilities {
 
     @Override
     protected void generateCapabilities() {
+        String cameraDeviceInfoTitle = getCameraDeviceInfoTitle();
+        if (cameraDeviceInfoTitle != null) {
+            addItem(new CapabilitiesItem(cameraDeviceInfoTitle, getCameraDeviceInfo()));
+        }
 //        addItem(new CapabilitiesItem("Capabilities", getAllSupportCapabilities()));
         addItem(new CapabilitiesItem("CameraFacing", getCameraFacing()));
         addItem(new CapabilitiesItem("HardwareLevel", getCameraHardwareLevel()));

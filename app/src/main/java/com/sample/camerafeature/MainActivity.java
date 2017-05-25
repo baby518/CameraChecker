@@ -1,6 +1,8 @@
 package com.sample.camerafeature;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
@@ -18,17 +20,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.sample.camerafeature.fragment.BaseFragment;
 import com.sample.camerafeature.fragment.CameraInfoFragment;
 import com.sample.camerafeature.fragment.OverviewFragment;
-import com.sample.camerafeature.utils.PreferenceManager;
+import com.sample.camerafeature.utils.SettingsManager;
+import com.sample.camerafeature.utils.ProcCameraInfoParse;
+import com.sample.camerafeature.utils.Shell;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    private PreferenceManager mPreferenceManager;
+    private SettingsManager mSettingsManager;
     private boolean mUseCameraApi2 = false;
 
     private ViewPager mViewPager;
@@ -59,11 +64,14 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        ProcCameraInfoParse.parseAndSave(mSettingsManager);
     }
 
     private void initPreferenceManager() {
-        mPreferenceManager = new PreferenceManager(this);
-        mUseCameraApi2 = mPreferenceManager.getBoolean(PreferenceManager.KEY_USE_CAMERA2, false);
+        mSettingsManager = SettingsManager.getInstance(this);
+        mUseCameraApi2 = mSettingsManager.getBoolean(SettingsManager.SCOPE_GLOBAL,
+                SettingsManager.KEY_USE_CAMERA2, false);
     }
 
     private void initSectionsPagerAdapter(boolean api2) {
@@ -104,6 +112,22 @@ public class MainActivity extends AppCompatActivity {
             if (id == R.id.action_use_camera2) {
                 onCameraChecked(item);
                 return true;
+            } else if (id == R.id.action_cat_camera_info) {
+                String result = Shell.exec("cat /proc/camerainfo");
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.action_cat_camera_info)
+                        .setMessage(result)
+                        .setPositiveButton(R.string.dialog_dismiss,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (dialog != null) {
+                                            dialog.dismiss();
+                                        }
+                                    }
+                                })
+                        .show();
+                return true;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -115,7 +139,8 @@ public class MainActivity extends AppCompatActivity {
             mUseCameraApi2 = api2;
             reloadSectionsPagerAdapter(mUseCameraApi2);
         }
-        mPreferenceManager.putBoolean(PreferenceManager.KEY_USE_CAMERA2, item.isChecked());
+        mSettingsManager.set(SettingsManager.SCOPE_GLOBAL, SettingsManager.KEY_USE_CAMERA2,
+                item.isChecked());
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -162,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return fragmentList.get(position).getName();
+            return fragmentList.get(position).getName(getResources());
         }
     }
 }

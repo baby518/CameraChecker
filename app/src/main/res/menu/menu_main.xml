@@ -6,4 +6,8 @@
         android:title="@string/action_use_camera2"
         android:checkable="true"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_cat_camera_info"
+        android:title="@string/action_cat_camera_info"
+        app:showAsAction="never" />
 </menu>

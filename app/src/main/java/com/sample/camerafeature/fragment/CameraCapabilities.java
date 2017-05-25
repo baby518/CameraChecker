@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class CameraCapabilities extends BaseCapabilities {
+public class CameraCapabilities extends BaseCameraCapabilities {
     private Camera.CameraInfo mCameraInfo = new Camera.CameraInfo();
     private Camera.Parameters mParameters;
     private static HashMap<Integer, Camera.Parameters> ParametersCache = new HashMap<>();
@@ -19,6 +19,7 @@ public class CameraCapabilities extends BaseCapabilities {
     }
 
     public CameraCapabilities(Context context, int cameraId) {
+        super(context, cameraId);
         clearCameraCapabilities();
         mCameraInfo = initCameraInfo(cameraId);
         mParameters = initCameraParameters(cameraId);
@@ -66,6 +67,10 @@ public class CameraCapabilities extends BaseCapabilities {
 
     @Override
     protected void generateCapabilities() {
+        String cameraDeviceInfoTitle = getCameraDeviceInfoTitle();
+        if (cameraDeviceInfoTitle != null) {
+            addItem(new CapabilitiesItem(cameraDeviceInfoTitle, getCameraDeviceInfo()));
+        }
         addItem(new CapabilitiesItem("CameraFacing", getCameraFacing()));
         addItem(new CapabilitiesItem("Sensor Orientation", getSensorOrientation()));
         addItem(new CapabilitiesItem("Flash Support", isFlashAvailable()));

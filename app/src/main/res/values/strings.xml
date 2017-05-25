@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">CameraFeature</string>
-    <string name="section_format">Hello World from section: %1$d</string>
-    <string name="res_folder_check">not found</string>
-    <string name="action_use_camera2">Use Camera2</string>
+    <string name="res_folder_check">N/A</string>
+    <string name="action_use_camera2">Use Camera2 API</string>
+    <string name="action_cat_camera_info">cat /proc/camerainfo</string>
+
+    <string name="dialog_dismiss">@android:string/cancel</string>
+
+    <string name="fragment_title_overview">Overview</string>
+    <string name="fragment_title_camera">Camera %1$d</string>
 </resources>

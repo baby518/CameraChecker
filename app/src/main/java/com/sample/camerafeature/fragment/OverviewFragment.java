@@ -1,7 +1,9 @@
 package com.sample.camerafeature.fragment;
 
 import android.content.Context;
+import android.content.res.Resources;
 
+import com.sample.camerafeature.R;
 import com.sample.camerafeature.utils.FeatureChecker;
 
 public class OverviewFragment extends BaseFragment {
@@ -12,8 +14,8 @@ public class OverviewFragment extends BaseFragment {
     }
 
     @Override
-    public String getName() {
-        return "Overview";
+    public String getName(Resources res) {
+        return res.getString(R.string.fragment_title_overview);
     }
 
     @Override

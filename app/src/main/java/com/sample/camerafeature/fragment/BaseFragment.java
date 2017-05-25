@@ -2,6 +2,7 @@ package com.sample.camerafeature.fragment;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -31,7 +32,7 @@ public abstract class BaseFragment extends ListFragment {
         setMyListAdapter();
     }
 
-    public String getName() {
+    public String getName(Resources res) {
         return "";
     }
 
