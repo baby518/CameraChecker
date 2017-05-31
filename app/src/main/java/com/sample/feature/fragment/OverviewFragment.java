@@ -1,10 +1,10 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import android.content.Context;
 import android.content.res.Resources;
 
 import com.sample.camerafeature.R;
-import com.sample.camerafeature.utils.FeatureChecker;
+import com.sample.feature.utils.FeatureChecker;
 
 public class OverviewFragment extends BaseFragment {
     public static OverviewFragment newInstance(boolean api2) {

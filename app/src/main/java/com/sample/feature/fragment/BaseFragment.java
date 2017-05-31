@@ -1,4 +1,4 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sample.camerafeature.R;
-import com.sample.camerafeature.fragment.BaseCapabilities.CapabilitiesItem;
+import com.sample.feature.fragment.BaseCapabilities.CapabilitiesItem;
 
 public abstract class BaseFragment extends ListFragment {
     public BaseCapabilities mCapabilities;

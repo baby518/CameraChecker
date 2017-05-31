@@ -1,10 +1,10 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import android.content.Context;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 
-import com.sample.camerafeature.utils.FeatureChecker;
+import com.sample.feature.utils.FeatureChecker;
 
 public class OverviewCapabilities extends BaseCapabilities {
     private boolean mConfigCameraSoundForced;

@@ -1,4 +1,4 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import android.content.Context;
 import android.content.res.Resources;

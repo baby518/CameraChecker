@@ -3,4 +3,15 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!-- camera preview -->
+    <color name="camera_control_bar_background">#33000000</color>
+    <color name="camera_control_shutter_color">#FFFFFFFF</color>
+    <color name="camera_control_shutter_outer">#FFFFFFFF</color>
+    <color name="camera_control_shutter_color_pressed">#4DFFFFFF</color>
+    <color name="camera_control_video_shutter_color">#EA2E2E</color>
+    <color name="camera_control_video_shutter_color_pressed">#4DEA2E2E</color>
+    <color name="camera_control_video_shutter_outer">#FFFFFFFF</color>
+    <color name="camera_option_bar_background">#33000000</color>
+    <color name="camera_live_info_background">#663F51B5</color>
 </resources>

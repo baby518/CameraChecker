@@ -1,13 +1,13 @@
-package com.sample.camerafeature.utils;
+package com.sample.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SettingsManager {
     public static final String SCOPE_GLOBAL = "default_scope";
-    private static String DEFAULT_NAME = "preferences";
-    public static String SCOPE_PREFIX = "preferences_";
-    public static String KEY_USE_CAMERA2 = "key_use_camera2";
+    private static final String DEFAULT_NAME = "preferences";
+    public static final String SCOPE_INFO_PREFIX = "camera_info_";
+    public static final String KEY_USE_CAMERA2 = "key_use_camera2";
 
     private static SettingsManager mSettingsManager;
 
@@ -28,8 +28,8 @@ public class SettingsManager {
         mDefaultPreferences = context.getSharedPreferences(DEFAULT_NAME, Context.MODE_PRIVATE);
     }
 
-    public static String getCameraIdScope(int cameraId) {
-        return SCOPE_PREFIX + cameraId;
+    public static String getCameraInfoScope(int cameraId) {
+        return SCOPE_INFO_PREFIX + cameraId;
     }
 
     private SharedPreferences getPreferencesFromScope(String scope) {
@@ -44,9 +44,7 @@ public class SettingsManager {
 
     public SharedPreferences openPreferences(String scope) {
         synchronized (mLock) {
-            SharedPreferences preferences;
-            preferences = mContext.getSharedPreferences(scope, Context.MODE_PRIVATE);
-            return preferences;
+            return mContext.getSharedPreferences(scope, Context.MODE_PRIVATE);
         }
     }
 

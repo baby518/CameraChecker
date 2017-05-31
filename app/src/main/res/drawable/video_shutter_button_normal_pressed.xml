@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/camera_control_bar_shutter_size"
+    android:height="@dimen/camera_control_bar_shutter_size"
+    android:viewportHeight="60.0"
+    android:viewportWidth="60.0">
+    <path
+        android:pathData="M30,30m-26,0a26,26 0,1 1,52 0a26,26 0,1 1,-52 0"
+        android:strokeColor="@color/camera_control_video_shutter_outer"
+        android:strokeWidth="5"/>
+    <path
+        android:fillColor="@color/camera_control_video_shutter_color_pressed"
+        android:pathData="M30,30m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0"/>
+</vector>

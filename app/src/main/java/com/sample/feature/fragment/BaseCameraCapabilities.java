@@ -1,8 +1,8 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import android.content.Context;
 
-import com.sample.camerafeature.utils.SettingsManager;
+import com.sample.preference.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class BaseCameraCapabilities extends BaseCapabilities {
 
     protected BaseCameraCapabilities(Context context, int cameraId) {
         mSettingsManager = SettingsManager.getInstance(context);
-        mSettingsScope = SettingsManager.getCameraIdScope(cameraId);
+        mSettingsScope = SettingsManager.getCameraInfoScope(cameraId);
     }
 
     @Override

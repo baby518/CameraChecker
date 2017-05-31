@@ -1,4 +1,4 @@
-package com.sample.camerafeature.fragment;
+package com.sample.feature.fragment;
 
 import java.util.ArrayList;
 import java.util.List;

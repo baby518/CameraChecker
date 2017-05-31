@@ -1,4 +1,4 @@
-package com.sample.camerafeature.utils;
+package com.sample.feature.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

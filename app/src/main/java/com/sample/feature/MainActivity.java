@@ -1,14 +1,14 @@
-package com.sample.camerafeature;
+package com.sample.feature;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -20,14 +20,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.sample.camerafeature.fragment.BaseFragment;
-import com.sample.camerafeature.fragment.CameraInfoFragment;
-import com.sample.camerafeature.fragment.OverviewFragment;
-import com.sample.camerafeature.utils.SettingsManager;
-import com.sample.camerafeature.utils.ProcCameraInfoParse;
-import com.sample.camerafeature.utils.Shell;
+import com.sample.camera.CameraActivity;
+import com.sample.camerafeature.R;
+import com.sample.feature.fragment.BaseFragment;
+import com.sample.feature.fragment.CameraInfoFragment;
+import com.sample.feature.fragment.OverviewFragment;
+import com.sample.preference.SettingsManager;
+import com.sample.feature.utils.ProcCameraInfoParse;
+import com.sample.feature.utils.Shell;
 
 import java.util.ArrayList;
 
@@ -51,25 +52,56 @@ public class MainActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
 
-        initSectionsPagerAdapter(mUseCameraApi2);
-
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onTabSelected(TabLayout.Tab tab) {
+                initOpenCameraButton(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+
+        initSectionsPagerAdapter(mUseCameraApi2);
 
         ProcCameraInfoParse.parseAndSave(mSettingsManager);
     }
 
+    private void initOpenCameraButton(int position) {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        final int cameraId = mSectionsPagerAdapter.getCameraId(position);
+
+        if (cameraId >= 0) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    openCamera(cameraId, mSectionsPagerAdapter.isUseApi2());
+                }
+            });
+            fab.setVisibility(View.VISIBLE);
+        } else {
+            fab.setOnClickListener(null);
+            fab.setVisibility(View.GONE);
+        }
+    }
+    
+    private void openCamera(int cameraId, boolean useApi2) {
+        Intent intent = new Intent(this, CameraActivity.class);
+        intent.putExtra(CameraActivity.KEY_CAMERA_ID, cameraId);
+        intent.putExtra(CameraActivity.KEY_USE_API2, useApi2);
+        startActivity(intent);
+    }
+
     private void initPreferenceManager() {
-        mSettingsManager = SettingsManager.getInstance(this);
+        mSettingsManager = SettingsManager.getInstance(getApplicationContext());
         mUseCameraApi2 = mSettingsManager.getBoolean(SettingsManager.SCOPE_GLOBAL,
                 SettingsManager.KEY_USE_CAMERA2, false);
     }
@@ -146,11 +178,13 @@ public class MainActivity extends AppCompatActivity {
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         private CameraManager mCameraManager;
         private ArrayList<BaseFragment> fragmentList = new ArrayList<>();
+        private boolean mUseApi2 = false;
 
         public SectionsPagerAdapter(FragmentManager fm, boolean api2) {
             super(fm);
             fragmentList.add(OverviewFragment.newInstance(api2));
             int num = 0;
+            mUseApi2 = api2;
             if (api2) {
                 mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
                 try {
@@ -168,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void changeToApi2(boolean api2) {
+            mUseApi2 = api2;
             if (fragmentList != null) {
                 for (BaseFragment fragment : fragmentList) {
                     fragment.setApi2(api2);
@@ -188,6 +223,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             return fragmentList.get(position).getName(getResources());
+        }
+
+        public boolean isUseApi2() {
+            return mUseApi2;
+        }
+
+        public int getCameraId(int position) {
+            // because first page is Overview fragment.
+            return position - 1;
         }
     }
 }

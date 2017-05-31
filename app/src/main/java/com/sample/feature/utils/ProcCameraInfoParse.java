@@ -1,4 +1,6 @@
-package com.sample.camerafeature.utils;
+package com.sample.feature.utils;
+
+import com.sample.preference.SettingsManager;
 
 /** parse /proc/camerainfo file content. */
 public class ProcCameraInfoParse {
@@ -25,7 +27,7 @@ public class ProcCameraInfoParse {
     }
 
     private static void saveTitle(int cameraId, String value, SettingsManager settingsManager) {
-        settingsManager.set(SettingsManager.getCameraIdScope(cameraId), KEY_TITLE, value);
+        settingsManager.set(SettingsManager.getCameraInfoScope(cameraId), KEY_TITLE, value);
     }
 
     private static void saveValue(int cameraId, String string, SettingsManager settingsManager) {
@@ -34,6 +36,6 @@ public class ProcCameraInfoParse {
         String[] resultArray = string.split(":");
         String key = resultArray[0];
         String value = resultArray[1];
-        settingsManager.set(SettingsManager.getCameraIdScope(cameraId), key, value);
+        settingsManager.set(SettingsManager.getCameraInfoScope(cameraId), key, value);
     }
 }

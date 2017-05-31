@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+    <com.sample.camera.view.AutoFitTextureView
+        android:id="@+id/camera_texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:visibility="gone"
+        android:id="@+id/live_info_layout"
+        android:layout_width="@dimen/live_info_view_width"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/live_info_view_margin_top"
+        android:layout_marginBottom="@dimen/live_info_view_margin_bottom"
+        android:background="@color/camera_live_info_background"
+        android:layout_gravity="end|top">
+        <ListView
+            android:id="@+id/live_info_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </ListView>
+        <!--<TextView-->
+            <!--android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"-->
+            <!--android:text="@string/app_name"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"/>-->
+    </FrameLayout>
+</FrameLayout>

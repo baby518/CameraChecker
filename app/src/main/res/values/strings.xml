@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">CameraFeature</string>
+    <string name="capture_name">Capture</string>
+
     <string name="res_folder_check">N/A</string>
     <string name="action_use_camera2">Use Camera2 API</string>
     <string name="action_cat_camera_info">cat /proc/camerainfo</string>
@@ -8,4 +10,6 @@
 
     <string name="fragment_title_overview">Overview</string>
     <string name="fragment_title_camera">Camera %1$d</string>
+
+    <string name="image_file_name_format" translatable="false">"'IMG'_yyyyMMdd_HHmmss"</string>
 </resources>
