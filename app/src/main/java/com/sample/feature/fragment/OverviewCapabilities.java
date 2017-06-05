@@ -21,7 +21,7 @@ public class OverviewCapabilities extends BaseCapabilities {
 
     @Override
     protected void generateCapabilities() {
-        addItem(new CapabilitiesItem("Hardware", FeatureChecker.getHardware()));
+        addItem(new CapabilitiesItem("Platform", FeatureChecker.getHardware() + ", " + FeatureChecker.getPlatform()));
         addItem(new CapabilitiesItem("Board", FeatureChecker.getHardwareBoard() + ", " + (FeatureChecker.is64bit() ? "64 bit" : "32 bit")));
         addItem(new CapabilitiesItem("Manufacturer", FeatureChecker.getHardwareManufacturer()));
         addItem(new CapabilitiesItem("Brand", FeatureChecker.getHardwareBrand()));

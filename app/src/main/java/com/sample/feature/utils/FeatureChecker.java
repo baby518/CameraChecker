@@ -2,6 +2,7 @@ package com.sample.feature.utils;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -23,6 +24,10 @@ public class FeatureChecker {
 
     public static String getHardware() {
         return Build.HARDWARE;
+    }
+
+    public static String getPlatform() {
+        return SystemProperties.get("ro.board.platform", Build.UNKNOWN);
     }
 
     public static String getHardwareBoard() {
