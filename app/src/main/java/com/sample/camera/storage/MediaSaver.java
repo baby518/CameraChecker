@@ -1,17 +1,22 @@
 package com.sample.camera.storage;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MediaSaver {
-    private static final String TAG = "MediaSaver";
+    private static final String TAG = "CAM_MediaSaver";
+    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
     /**
      * An interface defining the callback when a media is saved.
      */
@@ -39,6 +44,12 @@ public class MediaSaver {
                 /*(loc == null) ? null : new Location(loc),*/
                 width, height, orientation, mContentResolver, l);
         t.execute();
+    }
+
+    public void addVideo(String path, ContentValues values, OnMediaSavedListener listener) {
+        // We don't set a queue limit for video saving because the file
+        // is already in the storage. Only updating the database.
+        new VideoSaveTask(path, values, listener, mContentResolver).execute();
     }
 
     private static class ImageFileNamer {
@@ -114,6 +125,59 @@ public class MediaSaver {
                 Log.e(TAG, "Failed to write data", e);
                 return null;
             }
+        }
+
+        @Override
+        protected void onPostExecute(Uri uri) {
+            if (listener != null) {
+                listener.onMediaSaved(uri);
+            }
+        }
+    }
+
+    private class VideoSaveTask extends AsyncTask <Void, Void, Uri> {
+        private String path;
+        private final ContentValues values;
+        private final OnMediaSavedListener listener;
+        private final ContentResolver resolver;
+
+        public VideoSaveTask(String path, ContentValues values, OnMediaSavedListener l,
+                             ContentResolver r) {
+            this.path = path;
+            this.values = new ContentValues(values);
+            this.listener = l;
+            this.resolver = r;
+        }
+
+        @Override
+        protected Uri doInBackground(Void... v) {
+            Uri uri = null;
+            try {
+                String finalName = values.getAsString(MediaStore.Video.Media.DATA);
+                File finalFile = new File(finalName);
+                if (new File(path).renameTo(finalFile)) {
+                    path = finalName;
+                }
+                values.put(MediaStore.Video.Media.SIZE, finalFile.length());
+
+                if (!values.containsKey(MediaStore.Video.Media.DURATION)) {
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(finalName);
+                    String duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    values.put(MediaStore.Video.Media.DURATION, duration);
+                }
+
+                Log.i(TAG, String.format("insert video path = %s, finalName = %s", path, finalName));
+                uri = resolver.insert(Uri.parse(VIDEO_BASE_URI), values);
+            } catch (Exception e) {
+                // We failed to insert into the database. This can happen if
+                // the SD card is unmounted.
+                Log.e(TAG, "failed to add video to media store", e);
+                uri = null;
+            } finally {
+                Log.v(TAG, "Current video URI: " + uri);
+            }
+            return uri;
         }
 
         @Override

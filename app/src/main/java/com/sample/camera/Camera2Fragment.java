@@ -16,6 +16,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -27,11 +28,14 @@ import android.view.Surface;
 
 import com.sample.camera.settings.CameraSettings;
 import com.sample.camera.utils.CameraUtil;
+import com.sample.camera.utils.FileUtil;
 import com.sample.camerafeature.R;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class Camera2Fragment extends BaseCameraFragment {
     private static final String TAG = "CAM_FRAGMENT_API2";
@@ -42,23 +46,22 @@ public class Camera2Fragment extends BaseCameraFragment {
     private int mSensorOrientation = 0;
     private int mSensorFacing = -1;
 
-    private CameraCaptureSession mCaptureSession;
+    private CameraCaptureSession mPreviewSession;
 
     private HandlerThread mBackgroundThread;
     private Handler mBackgroundHandler;
     private Handler mMainHandler;
 
     private CaptureRequest.Builder mPreviewRequestBuilder;
-    private CaptureRequest mPreviewRequest;
     /** for still image capture */
     private ImageReader mImageReader;
 
     private static final HashMap<CameraSettings.FocusMode, Integer> FOCUS_MODE = new HashMap<>();
 
     static {
-        FOCUS_MODE.put(CameraSettings.FocusMode.FOCUS_MODE_AUTO, CaptureRequest.CONTROL_AF_MODE_AUTO);
-        FOCUS_MODE.put(CameraSettings.FocusMode.FOCUS_MODE_CONTINUOUS_PICTURE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-        FOCUS_MODE.put(CameraSettings.FocusMode.FOCUS_MODE_CONTINUOUS_VIDEO, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+        FOCUS_MODE.put(CameraSettings.FocusMode.AUTO, CaptureRequest.CONTROL_AF_MODE_AUTO);
+        FOCUS_MODE.put(CameraSettings.FocusMode.CONTINUOUS_PICTURE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        FOCUS_MODE.put(CameraSettings.FocusMode.CONTINUOUS_VIDEO, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
     }
 
     @Override
@@ -132,15 +135,15 @@ public class Camera2Fragment extends BaseCameraFragment {
 
             Size[] pictureSizes = map.getOutputSizes(ImageFormat.JPEG);
             mCameraSettings.setSupportedPictureSizes(CameraUtil.convert(pictureSizes));
+
+            Size[] videoSizes = map.getOutputSizes(MediaRecorder.class);
+            mCameraSettings.setSupportedVideoSizes(CameraUtil.convert(videoSizes));
         }
     }
 
     @Override
     protected void closeCamera() {
-        if (mCaptureSession != null) {
-            mCaptureSession.close();
-            mCaptureSession = null;
-        }
+        closePreviewSession();
         if (mCameraDevice != null) {
             mCameraDevice.close();
             mCameraDevice = null;
@@ -149,6 +152,11 @@ public class Camera2Fragment extends BaseCameraFragment {
         if (mImageReader != null) {
             mImageReader.close();
             mImageReader = null;
+        }
+
+        if (mMediaRecorder != null) {
+            mMediaRecorder.release();
+            mMediaRecorder = null;
         }
     }
 
@@ -170,6 +178,12 @@ public class Camera2Fragment extends BaseCameraFragment {
     }
 
     @Override
+    protected int getImageRotation() {
+        boolean isFrontCamera = (mSensorFacing == CameraMetadata.LENS_FACING_FRONT);
+        return CameraUtil.getImageRotation(mSensorOrientation, getDeviceOrientation(), isFrontCamera);
+    }
+
+    @Override
     protected void applySettingsBeforeStartPreview() {
         if (mCharacteristics == null) return;
         StreamConfigurationMap map = mCharacteristics.get(
@@ -181,7 +195,10 @@ public class Camera2Fragment extends BaseCameraFragment {
         setPreviewSize();
         // setup picture size
         setPictureSize();
-        //
+        // setup video size
+        setVideoSize();
+
+        mCameraSettings.onSettingApplied();
     }
 
     private void setPreviewSize() {
@@ -205,6 +222,13 @@ public class Camera2Fragment extends BaseCameraFragment {
         mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
     }
 
+    private void setVideoSize() {
+        // set optimal video size
+        mCameraSettings.generateOptimalVideoQuality();
+        Size optimalSize = mCameraSettings.getVideoSize();
+        Log.i(TAG, "set video size " + optimalSize);
+    }
+
     private void createCameraPreviewSession() {
         SurfaceTexture texture = mCameraTextureView.getSurfaceTexture();
         if (texture == null) return;
@@ -220,8 +244,7 @@ public class Camera2Fragment extends BaseCameraFragment {
                 mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()),
                         new CameraCaptureSession.StateCallback() {
                             @Override
-                            public void onConfigured(
-                                    @NonNull CameraCaptureSession cameraCaptureSession) {
+                            public void onConfigured(@NonNull CameraCaptureSession cameraSession) {
                                 // The camera is already closed
                                 if (mCameraDevice == null) {
                                     return;
@@ -229,7 +252,7 @@ public class Camera2Fragment extends BaseCameraFragment {
 
                                 // When the session is ready, we start displaying
                                 // the preview.
-                                mCaptureSession = cameraCaptureSession;
+                                mPreviewSession = cameraSession;
                                 // set focus mode
                                 int targetFocusMode = FOCUS_MODE.get(mCameraSettings.getFocusMode());
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, targetFocusMode);
@@ -237,14 +260,8 @@ public class Camera2Fragment extends BaseCameraFragment {
                                 // necessary.
                                 // setAutoFlash(mPreviewRequestBuilder);
 
-                                try {
-                                    // Finally, we start displaying the camera preview.
-                                    mPreviewRequest = mPreviewRequestBuilder.build();
-                                    mCaptureSession.setRepeatingRequest(mPreviewRequest, mPreviewCallback,
-                                            mBackgroundHandler);
-                                } catch (CameraAccessException e) {
-                                    e.printStackTrace();
-                                }
+                                // Finally, we start displaying the camera preview.
+                                applyPreviewRequest(mPreviewCallback);
                             }
 
                             @Override
@@ -264,19 +281,23 @@ public class Camera2Fragment extends BaseCameraFragment {
         if (mPreviewRequestBuilder == null) {
             createCameraPreviewSession();
         } else {
-            try {
-                // Finally, we start displaying the camera preview.
-                mCaptureSession.setRepeatingRequest(mPreviewRequest, mPreviewCallback,
-                        mBackgroundHandler);
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
-            }
+            applyPreviewRequest(mPreviewCallback);
+        }
+    }
+
+    private void applyPreviewRequest(CameraCaptureSession.CaptureCallback listener) {
+        try {
+            // start displaying the camera preview.
+            mPreviewSession.setRepeatingRequest(mPreviewRequestBuilder.build(), listener,
+                    mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void stopPreview() {
-
+        mPreviewRequestBuilder = null;
     }
 
     @Override
@@ -297,37 +318,104 @@ public class Camera2Fragment extends BaseCameraFragment {
             captureBuilder.addTarget(mImageReader.getSurface());
 
             // Orientation
-            boolean isFrontCamera = (mSensorFacing == CameraMetadata.LENS_FACING_FRONT);
-            int jpegRotation = CameraUtil.getImageRotation(mSensorOrientation, getDeviceOrientation(), isFrontCamera);
+            int jpegRotation = getImageRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
 
+            setCameraOperation(OPERATION.CAPTURING);
             CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                         @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     Log.i(TAG, "onCaptureCompleted");
+                    setCameraOperation(OPERATION.IDLE);
                     stopPreview();
                     startPreview();
                 }
             };
 
-            mCaptureSession.stopRepeating();
-            mCaptureSession.capture(captureBuilder.build(), captureCallback, null);
+            mPreviewSession.stopRepeating();
+            mPreviewSession.capture(captureBuilder.build(), captureCallback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
 
+    // ++++++++++++++++++++++++++++++  Video Recording code start +++++++++++++++++++++++++++++++++
     @Override
     protected void startVideoRecording() {
+        closePreviewSession();
+        SurfaceTexture texture = mCameraTextureView.getSurfaceTexture();
+        if (texture == null) {
+            stopVideoRecording(true);
+        } else {
+            texture.setDefaultBufferSize(mCameraSettings.getVideoSize().getWidth(),
+                    mCameraSettings.getVideoSize().getHeight());
+            try {
+                mPreviewRequestBuilder = mCameraDevice
+                        .createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+                List<Surface> surfaces = new ArrayList<>();
 
+                // Set up Surface for the camera preview
+                Surface previewSurface = new Surface(texture);
+                surfaces.add(previewSurface);
+                mPreviewRequestBuilder.addTarget(previewSurface);
+
+                // Set up Surface for the MediaRecorder
+                Surface recorderSurface = mMediaRecorder.getSurface();
+                surfaces.add(recorderSurface);
+                mPreviewRequestBuilder.addTarget(recorderSurface);
+
+                // Start a capture session
+                // Once the session starts, we can update the UI and start recording
+                mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
+                    @Override
+                    public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                        mPreviewSession = cameraCaptureSession;
+                        applyPreviewRequest(null);
+                        Camera2Fragment.super.startVideoRecording();
+                    }
+
+                    @Override
+                    public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                        Exception e = new Exception("onConfigureFailed");
+                        onVideoRecordingError(e);
+                    }
+                }, mBackgroundHandler);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
-    protected void stopVideoRecording() {
-
+    protected void onVideoRecordStateChanged(RECORD_STATE oldState, RECORD_STATE newState) {
+        super.onVideoRecordStateChanged(oldState, newState);
+        if (oldState == RECORD_STATE.STOPPING && newState == RECORD_STATE.NONE) {
+            // VideoRecord done
+            onVideoRecordDone();
+        }
     }
 
+    private void onVideoRecordDone() {
+        // VideoRecord done, restart preview
+        stopPreview();
+        startPreview();
+    }
+
+    @Override
+    protected void setAVSourceForMediaRecorder(MediaRecorder mediaRecorder) {
+        if (mediaRecorder == null) return;
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+    }
+
+    private void closePreviewSession() {
+        if (mPreviewSession != null) {
+            mPreviewSession.close();
+            mPreviewSession = null;
+        }
+    }
+    // ++++++++++++++++++++++++++++++  Video Recording code end +++++++++++++++++++++++++++++++++
 
     /**
      * Starts a background thread and its {@link Handler}.

@@ -15,5 +15,5 @@
 
     <dimen name="live_info_view_margin_top">@dimen/camera_option_bar_height</dimen>
     <dimen name="live_info_view_margin_bottom">@dimen/camera_control_bar_height</dimen>
-    <dimen name="live_info_view_width">160dp</dimen>
+    <dimen name="live_info_view_width">180dp</dimen>
 </resources>

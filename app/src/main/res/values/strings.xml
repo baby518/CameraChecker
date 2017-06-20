@@ -12,4 +12,5 @@
     <string name="fragment_title_camera">Camera %1$d</string>
 
     <string name="image_file_name_format" translatable="false">"'IMG'_yyyyMMdd_HHmmss"</string>
+    <string name="video_file_name_format" translatable="false">"'VID'_yyyyMMdd_HHmmss"</string>
 </resources>

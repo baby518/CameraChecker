@@ -1,6 +1,7 @@
 package com.sample.camera.utils;
 
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
 import android.util.Log;
 import android.util.Size;
 
@@ -10,6 +11,16 @@ import java.util.List;
 
 public class CameraUtil {
     protected static final String TAG = "CameraUtil";
+
+    public static int[] sVideoQualities = new int[] {
+            CamcorderProfile.QUALITY_2160P,
+            CamcorderProfile.QUALITY_1080P,
+            CamcorderProfile.QUALITY_720P,
+            CamcorderProfile.QUALITY_480P,
+            CamcorderProfile.QUALITY_CIF,
+            CamcorderProfile.QUALITY_QVGA,
+            CamcorderProfile.QUALITY_QCIF
+    };
 
     public static Size getOptimalSize(List<Size> sizes, double targetRatio) {
         return getOptimalSize(sizes, targetRatio, new Size(Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -72,6 +83,26 @@ public class CameraUtil {
         return optimalSizeIndex;
     }
 
+    public static int getOptimalVideoQuality(int cameraId, List<Size> sizes, double targetRatio) {
+        final double aspectRatioTolerance = 0.02;
+        for (int quality : sVideoQualities) {
+            boolean has = CamcorderProfile.hasProfile(cameraId, quality);
+            if (has) {
+                CamcorderProfile profile = CamcorderProfile.get(cameraId, quality);
+                Size size = new Size(profile.videoFrameWidth, profile.videoFrameHeight);
+                double ratio = (double) size.getWidth() / size.getHeight();
+                if (Math.abs(ratio - targetRatio) > aspectRatioTolerance) {
+                    continue;
+                }
+                if (sizes.contains(size)) {
+                    return quality;
+                }
+            }
+        }
+        // default
+        return CamcorderProfile.QUALITY_HIGH;
+    }
+
     public static List<Size> convert(List<Camera.Size> sizes) {
         ArrayList<Size> converted = new ArrayList<>(sizes.size());
         for (Camera.Size size : sizes) {
@@ -86,6 +117,25 @@ public class CameraUtil {
 
     public static List<Size> convert(Size[] sizes) {
         return Arrays.asList(sizes);
+    }
+
+    public static Size strToSize(String str) {
+        if (str == null) return null;
+
+        int pos = str.indexOf('x');
+        if (pos != -1) {
+            String width = str.substring(0, pos);
+            String height = str.substring(pos + 1);
+            return new Size(Integer.parseInt(width),
+                    Integer.parseInt(height));
+        }
+        Log.e(TAG, "Invalid size parameter string=" + str);
+        return null;
+    }
+
+    public static String sizeToStr(Size size) {
+        if (size == null) return null;
+        return Integer.toString(size.getWidth()) + "x" + Integer.toString(size.getHeight());
     }
 
     /**

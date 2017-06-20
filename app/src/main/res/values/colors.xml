@@ -13,5 +13,5 @@
     <color name="camera_control_video_shutter_color_pressed">#4DEA2E2E</color>
     <color name="camera_control_video_shutter_outer">#FFFFFFFF</color>
     <color name="camera_option_bar_background">#33000000</color>
-    <color name="camera_live_info_background">#663F51B5</color>
+    <color name="camera_live_info_background">#33000000</color>
 </resources>

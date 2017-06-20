@@ -1,6 +1,7 @@
 package com.sample.camera.settings;
 
 import android.content.Context;
+import android.media.CamcorderProfile;
 import android.util.Log;
 import android.util.Size;
 
@@ -10,15 +11,22 @@ import com.sample.camerafeature.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CameraSettings {
     private static final String TAG = "CameraSettings";
 
+    private int mCameraId = -1;
+
     private List<Size> mSupportedPreviewSizes = new ArrayList<>();
     private List<Size> mSupportedPictureSizes = new ArrayList<>();
+    private List<Size> mSupportedVideoSizes = new ArrayList<>();
     private Size mPreviewSize;
     private Size mPictureSize;
+    private Size mVideoSize;
+    private int mVideoQuality;
     private AspectRatio mPreviewAspectRatio = AspectRatio.RATIO_169;
 
     public enum AspectRatio {
@@ -29,15 +37,29 @@ public class CameraSettings {
     private final int mPreviewTopMargin169;
 
     public enum FocusMode {
-        FOCUS_MODE_AUTO, FOCUS_MODE_CONTINUOUS_PICTURE, FOCUS_MODE_CONTINUOUS_VIDEO
+        AUTO, CONTINUOUS_PICTURE, CONTINUOUS_VIDEO
     }
 
-    private FocusMode mFocusMode = FocusMode.FOCUS_MODE_CONTINUOUS_PICTURE;
+    private FocusMode mFocusMode = FocusMode.CONTINUOUS_PICTURE;
+
+    public interface CameraSettingListener {
+        void onSettingApplied(Map<String, String> settings);
+    }
+
+    private ArrayList<CameraSettingListener> listeners = new ArrayList<>();
+
+    public void addCameraSettingListener(CameraSettingListener listener) {
+        listeners.add(listener);
+    }
 
     public CameraSettings(Context context) {
         mPreviewTopMargin169 = 0;
         mPreviewTopMargin43 = context.getResources()
                 .getDimensionPixelSize(R.dimen.camera_option_bar_height);
+    }
+
+    public void setCameraId(int cameraId) {
+        mCameraId = cameraId;
     }
 
     public void setPreviewAspectRatio(AspectRatio aspectRatio) {
@@ -104,6 +126,30 @@ public class CameraSettings {
         this.mSupportedPictureSizes = supportedPictureSizes;
     }
 
+    public void setSupportedVideoSizes(List<Size> supportedVideoSizes) {
+        this.mSupportedVideoSizes = supportedVideoSizes;
+    }
+
+    public List<Size> getSupportedVideoSizes() {
+        return mSupportedVideoSizes;
+    }
+
+    public Size getVideoSize() {
+        return mVideoSize;
+    }
+
+    public int getVideoQuality() {
+        return mVideoQuality;
+    }
+
+    public void generateOptimalVideoQuality() {
+        mVideoQuality = CameraUtil.getOptimalVideoQuality(mCameraId, mSupportedVideoSizes,
+                getPreviewAspectRatioDouble());
+
+        CamcorderProfile profile = CamcorderProfile.get(mCameraId, mVideoQuality);
+        mVideoSize = new Size(profile.videoFrameWidth, profile.videoFrameHeight);
+    }
+
     public FocusMode getFocusMode() {
         return mFocusMode;
     }
@@ -113,7 +159,22 @@ public class CameraSettings {
     }
 
     public void onSettingApplied() {
-        // TODO update live info.
+        Map<String, String> settings = generateSettingMap();
+        for (CameraSettingListener listener : listeners) {
+            if (listener != null) {
+                listener.onSettingApplied(settings);
+            }
+        }
+    }
+
+    private Map<String, String> generateSettingMap() {
+        Map<String, String> settings = new HashMap<>();
+        settings.put("PreviewSize", mPreviewSize.toString());
+        settings.put("VideoSize", mVideoSize.toString());
+        settings.put("VideoQuality", Integer.toString(mVideoQuality));
+        settings.put("PictureSize", mPictureSize.toString());
+        settings.put(mFocusMode.getClass().getSimpleName(), mFocusMode.name());
+        return settings;
     }
 
     /**
