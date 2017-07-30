@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -17,9 +20,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.sample.camera.CameraActivity;
 import com.sample.camerafeature.R;
@@ -29,10 +34,12 @@ import com.sample.feature.fragment.OverviewFragment;
 import com.sample.preference.SettingsManager;
 import com.sample.feature.utils.ProcCameraInfoParse;
 import com.sample.feature.utils.Shell;
+import com.sample.utils.PermissionUtils;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int PERMISSION_REQUEST_CODE = 1001;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private SettingsManager mSettingsManager;
     private boolean mUseCameraApi2 = false;
@@ -69,9 +76,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        initSectionsPagerAdapter(mUseCameraApi2);
-
         ProcCameraInfoParse.parseAndSave(mSettingsManager);
+
+        if (checkPermissions()) {
+            initSectionsPagerAdapter(mUseCameraApi2);
+        }
+    }
+
+    private boolean checkPermissions() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return PermissionUtils.checkPermissions(this, PERMISSION_REQUEST_CODE);
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (!PermissionUtils.checkPermissionResult(permissions, grantResults)) {
+            Snackbar snackbar = Snackbar.make(mViewPager, getString(R.string.permission_tips), Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
+        initSectionsPagerAdapter(mUseCameraApi2);
     }
 
     private void initOpenCameraButton(int position) {
@@ -146,6 +172,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.action_cat_camera_info) {
                 String result = Shell.exec("cat /proc/camerainfo");
+                if (result == null || result.equals("")) {
+                    result = getString(R.string.need_root_tips);
+                }
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.action_cat_camera_info)
                         .setMessage(result)

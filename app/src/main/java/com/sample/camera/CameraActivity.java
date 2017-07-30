@@ -1,37 +1,51 @@
 package com.sample.camera;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import com.sample.camerafeature.R;
+import com.sample.utils.PermissionUtils;
 
 public class CameraActivity extends AppCompatActivity {
+    private static final int PERMISSION_REQUEST_CODE = 1002;
     public static final String KEY_CAMERA_ID = "key_camera_id";
     public static final String KEY_USE_API2 = "key_camera_api2";
+    private boolean mUseApi2 = false;
+    private int mCameraId = 0;
+    private OnBackPressedListener mOnBackPressedListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         setContentView(R.layout.activity_camera);
         super.onCreate(savedInstanceState);
-        int cameraId = getIntent().getIntExtra(KEY_CAMERA_ID, 0);
-        boolean useApi2 = getIntent().getBooleanExtra(KEY_USE_API2, false);
+        mCameraId = getIntent().getIntExtra(KEY_CAMERA_ID, 0);
+        mUseApi2 = getIntent().getBooleanExtra(KEY_USE_API2, false);
 
         if (savedInstanceState == null) {
-            final BaseCameraFragment dialog = useApi2 ? new Camera2Fragment() : new CameraFragment();
-            Bundle arguments = new Bundle();
-            arguments.putInt(KEY_CAMERA_ID, cameraId);
-            dialog.setArguments(arguments);
-            getFragmentManager().beginTransaction().replace(R.id.content, dialog).commit();
-            onBackPressedListener = dialog.getOnBackPressedListener();
+            if (checkPermissions()) {
+                initCameraFragment();
+            }
         }
+    }
+
+    private void initCameraFragment() {
+        final BaseCameraFragment dialog = mUseApi2 ? new Camera2Fragment() : new CameraFragment();
+        Bundle arguments = new Bundle();
+        arguments.putInt(KEY_CAMERA_ID, mCameraId);
+        dialog.setArguments(arguments);
+        getFragmentManager().beginTransaction().replace(R.id.content, dialog).commit();
+        mOnBackPressedListener = dialog.getOnBackPressedListener();
     }
 
     @Override
     public void onBackPressed() {
         boolean ret = false;
-        if (onBackPressedListener != null) {
-            ret = onBackPressedListener.onBackPressed();
+        if (mOnBackPressedListener != null) {
+            ret = mOnBackPressedListener.onBackPressed();
         }
         if (!ret) {
             super.onBackPressed();
@@ -42,5 +56,22 @@ public class CameraActivity extends AppCompatActivity {
         boolean onBackPressed();
     }
 
-    private OnBackPressedListener onBackPressedListener;
+    private boolean checkPermissions() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return PermissionUtils.checkPermissions(this, PERMISSION_REQUEST_CODE);
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (!PermissionUtils.checkPermissionResult(permissions, grantResults)) {
+            Snackbar snackbar = Snackbar.make(getWindow().getDecorView(),
+                    getString(R.string.permission_tips), Snackbar.LENGTH_LONG);
+            snackbar.show();
+        } else {
+            initCameraFragment();
+        }
+    }
 }
