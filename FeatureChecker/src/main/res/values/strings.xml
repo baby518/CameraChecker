@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CameraFeature</string>
+    <string name="permission_tips">Please make sure all permissions were granted.</string>
+
+    <string name="res_folder_check">N/A</string>
+    <string name="action_use_camera2">Use Camera2 API</string>
+    <string name="action_cat_camera_info">cat /proc/camerainfo</string>
+    <string name="need_root_tips">Need ROOT</string>
+
+    <string name="dialog_dismiss">@android:string/cancel</string>
+
+    <string name="fragment_title_overview">Overview</string>
+    <string name="fragment_title_camera">Camera %1$d</string>
+</resources>

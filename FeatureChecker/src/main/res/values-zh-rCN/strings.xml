@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">相机规格</string>
+    <string name="action_use_camera2">使用API-2接口</string>
+    <string name="permission_tips">为确保功能正常使用，请允许所有的权限</string>
+
+    <string name="fragment_title_overview">首页</string>
+    <string name="fragment_title_camera">摄像头 %1$d</string>
+</resources>

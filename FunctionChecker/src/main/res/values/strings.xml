@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CameraFunction</string>
+    <string name="permission_tips">Please make sure all permissions were granted.</string>
+
+    <string name="image_file_name_format" translatable="false">"'IMG'_yyyyMMdd_HHmmss"</string>
+    <string name="video_file_name_format" translatable="false">"'VID'_yyyyMMdd_HHmmss"</string>
+</resources>
