@@ -1,5 +1,6 @@
 package com.sample.function;
 
+import android.Manifest;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,10 +8,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
-import com.sample.function.utils.PermissionUtils;
+import com.sample.common.utils.PermissionUtils;
 
 public class CameraActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1002;
+    private static String[] CAMERA_PERMISSIONS = {
+            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+    };
     public static final String KEY_CAMERA_ID = "key_camera_id";
     public static final String KEY_USE_API2 = "key_camera_api2";
     private boolean mUseApi2 = false;
@@ -57,7 +62,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private boolean checkPermissions() {
         if (Build.VERSION.SDK_INT >= 23) {
-            return PermissionUtils.checkPermissions(this, PERMISSION_REQUEST_CODE);
+            return PermissionUtils.checkPermissions(this, CAMERA_PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
         return true;
     }

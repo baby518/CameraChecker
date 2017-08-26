@@ -1,21 +1,11 @@
-package com.sample.function.utils;
+package com.sample.common.utils;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
 
 public class PermissionUtils {
-    private static String[] CAMERA_PERMISSIONS = {
-            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
-    };
-
-    public static boolean checkPermissions(final Activity activity, int operationHandle) {
-        return checkPermissions(activity, CAMERA_PERMISSIONS, operationHandle);
-    }
-
     public static boolean checkPermissions(final Activity activity, String[] permissions,
             int operationHandle) {
         if (permissions == null)

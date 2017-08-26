@@ -1,1 +1,1 @@
-include ':FeatureChecker', ':FunctionChecker'
+include ':FeatureChecker', ':FunctionChecker', ':Common'

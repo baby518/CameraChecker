@@ -1,5 +1,6 @@
 package com.sample.feature;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,12 +25,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.sample.feature.R;
+import com.sample.common.utils.PermissionUtils;
 import com.sample.feature.fragment.BaseFragment;
 import com.sample.feature.fragment.CameraInfoFragment;
 import com.sample.feature.fragment.OverviewFragment;
 import com.sample.feature.preference.SettingsManager;
-import com.sample.feature.utils.PermissionUtils;
 import com.sample.feature.utils.ProcCameraInfoParse;
 import com.sample.feature.utils.Shell;
 
@@ -37,6 +37,10 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1001;
+    private static String[] CAMERA_PERMISSIONS = {
+            Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+    };
     private static final String INTENT_CAMERA_FUNCTION = "com.sample.camera.function.OPEN_CAMERA";
     public static final String KEY_CAMERA_ID = "key_camera_id";
     public static final String KEY_USE_API2 = "key_camera_api2";
@@ -85,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkPermissions() {
         if (Build.VERSION.SDK_INT >= 23) {
-            return PermissionUtils.checkPermissions(this, PERMISSION_REQUEST_CODE);
+            return PermissionUtils.checkPermissions(this, CAMERA_PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
         return true;
     }
