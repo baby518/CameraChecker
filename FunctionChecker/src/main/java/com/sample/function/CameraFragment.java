@@ -54,6 +54,7 @@ public class CameraFragment extends BaseCameraFragment {
         mCameraSettings.setSupportedPictureSizes(supportedPictureSizes);
         List<Size> supportedVideoSizes = CameraUtil.convert(parameters.getSupportedVideoSizes());
         mCameraSettings.setSupportedVideoSizes(supportedVideoSizes);
+        mCameraSettings.setSupportedFocusMode(parameters.getSupportedFocusModes());
     }
 
     @Override
@@ -133,8 +134,10 @@ public class CameraFragment extends BaseCameraFragment {
         String targetFocusMode = FOCUS_MODE.get(mCameraSettings.getFocusMode());
         String focusMode = parameters.getFocusMode();
         if (!targetFocusMode.equals(focusMode)) {
-            parameters.setFocusMode(targetFocusMode);
-            needSetParameters = true;
+            if (mCameraSettings.isFocusModeSupport(targetFocusMode)) {
+                parameters.setFocusMode(targetFocusMode);
+                needSetParameters = true;
+            }
         }
 
         if (needSetParameters) {

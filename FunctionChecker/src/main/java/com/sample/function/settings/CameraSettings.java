@@ -23,6 +23,7 @@ public class CameraSettings {
     private List<Size> mSupportedPreviewSizes = new ArrayList<>();
     private List<Size> mSupportedPictureSizes = new ArrayList<>();
     private List<Size> mSupportedVideoSizes = new ArrayList<>();
+    private List<String> mSupportedFocusMode = new ArrayList<>();
     private Size mPreviewSize;
     private Size mPictureSize;
     private Size mVideoSize;
@@ -156,6 +157,14 @@ public class CameraSettings {
 
     public void setFocusMode(FocusMode focusMode) {
         this.mFocusMode = focusMode;
+    }
+
+    public void setSupportedFocusMode(List<String> supportedFocusMode) {
+        this.mSupportedFocusMode = supportedFocusMode;
+    }
+
+    public boolean isFocusModeSupport(String focusMode) {
+        return mSupportedFocusMode.contains(focusMode);
     }
 
     public void onSettingApplied() {
