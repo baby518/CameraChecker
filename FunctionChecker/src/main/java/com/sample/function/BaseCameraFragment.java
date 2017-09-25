@@ -240,7 +240,8 @@ public abstract class BaseCameraFragment extends Fragment
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureAvailable");
+        Log.i(TAG, "onSurfaceTextureAvailable mDeviceState " + mDeviceState);
+        if (mDeviceState == STATE.UNOPENED) return;
         setupPreview();
     }
 
