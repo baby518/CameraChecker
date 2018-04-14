@@ -17,6 +17,8 @@ public class FeatureChecker {
     private static String sResFolderCheck;
     private static int sScreenWidthLong;
     private static int sScreenWidthShort;
+    private static int sScreenRealWidthLong;
+    private static int sScreenRealWidthShort;
 
     public static String getBuildType() {
         return Build.TYPE;
@@ -75,7 +77,11 @@ public class FeatureChecker {
     }
 
     public static String getScreenResolution() {
-        return sScreenWidthLong + "x" + sScreenWidthShort;
+        if (sScreenRealWidthLong == sScreenWidthLong && sScreenRealWidthShort == sScreenWidthShort) {
+            return sScreenWidthLong + "x" + sScreenWidthShort;
+        } else {
+            return sScreenWidthLong + "x" + sScreenWidthShort + "," + sScreenRealWidthLong + "x" + sScreenRealWidthShort;
+        }
     }
 
     public static boolean is64bit() {
@@ -87,10 +93,15 @@ public class FeatureChecker {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        sDensity = displayMetrics.density;
-        sDensityDpi = displayMetrics.densityDpi;
         sScreenWidthLong = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         sScreenWidthShort = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
+
+        DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+        sDensity = realDisplayMetrics.density;
+        sDensityDpi = realDisplayMetrics.densityDpi;
+        sScreenRealWidthLong = Math.max(realDisplayMetrics.widthPixels, realDisplayMetrics.heightPixels);
+        sScreenRealWidthShort = Math.min(realDisplayMetrics.widthPixels, realDisplayMetrics.heightPixels);
         sResFolderCheck = context.getString(R.string.res_folder_check);
         sInitialized = true;
     }
