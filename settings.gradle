@@ -1,1 +1,4 @@
-include ':FeatureChecker', ':FunctionChecker', ':Common', ':Benchmark'
+include ':Common'
+include ':FeatureChecker'
+include ':FunctionChecker'
+include ':Benchmark'

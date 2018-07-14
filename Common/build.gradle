@@ -1,12 +1,13 @@
 apply plugin: 'com.android.library'
 
+def buildInfo = rootProject.ext.buildInfo
+
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion buildInfo.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 25
+        minSdkVersion buildInfo.minSdkVersion
+        targetSdkVersion buildInfo.compileSdkVersion
         versionCode 1
         versionName "1.0"
     }
@@ -19,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    api fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    implementation "com.android.support:appcompat-v7:${buildInfo.androidLibraryVersion}"
 }
