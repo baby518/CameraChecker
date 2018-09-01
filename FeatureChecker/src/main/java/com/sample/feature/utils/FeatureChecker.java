@@ -2,13 +2,11 @@ package com.sample.feature.utils;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.SystemProperties;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.sample.common.utils.SystemProperties;
 import com.sample.feature.R;
-
-import dalvik.system.VMRuntime;
 
 public class FeatureChecker {
     private static float sDensity;
@@ -84,8 +82,8 @@ public class FeatureChecker {
         }
     }
 
-    public static boolean is64bit() {
-        return VMRuntime.getRuntime().is64Bit();
+    public static String[] getAbiList() {
+        return Build.SUPPORTED_ABIS;
     }
 
     public static void initialize(Context context) {
@@ -106,7 +104,7 @@ public class FeatureChecker {
         sInitialized = true;
     }
 
-    public static boolean isInitialized() {
+    private static boolean isInitialized() {
         return sInitialized;
     }
 }

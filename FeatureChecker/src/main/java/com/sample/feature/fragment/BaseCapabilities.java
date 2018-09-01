@@ -1,6 +1,7 @@
 package com.sample.feature.fragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ public abstract class BaseCapabilities {
         public CapabilitiesItem(String title, Object[] contentArray) {
             this.title = title;
             if (contentArray != null && contentArray.length > 0) {
+                this.contentList = Arrays.asList(contentArray);
                 this.content = contentArray[0].toString();
             }
         }

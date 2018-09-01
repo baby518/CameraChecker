@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.util.Range;
 import android.util.Rational;
@@ -223,12 +224,23 @@ public class Camera2Capabilities extends BaseCameraCapabilities {
     private List<String> getSupportedJpegPictureSizes() {
         List<String> result = new ArrayList<>();
         if (mCharacteristics != null) {
-            Size[] array = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
-            if (array != null) {
-                for (Size size : array) {
-                    result.add(size.getWidth() + "x" + size.getHeight());
+            StreamConfigurationMap map = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            if (map != null) {
+                Size[] highRes = map.getHighResolutionOutputSizes(ImageFormat.JPEG);
+                if (highRes != null && highRes.length > 0) {
+                    for (Size size : highRes) {
+                        result.add(size.getWidth() + "x" + size.getHeight());
+                    }
                 }
-            } else {
+
+                Size[] array = map.getOutputSizes(ImageFormat.JPEG);
+                if (array != null && array.length > 0) {
+                    for (Size size : array) {
+                        result.add(size.getWidth() + "x" + size.getHeight());
+                    }
+                }
+            }
+            if (result.size() == 0) {
                 result.add(NA);
             }
         }

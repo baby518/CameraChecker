@@ -1,9 +1,10 @@
 package com.sample.feature.fragment;
 
 import android.content.Context;
-import android.os.SystemProperties;
+import android.content.res.Resources;
 import android.telephony.TelephonyManager;
 
+import com.sample.common.utils.SystemProperties;
 import com.sample.feature.utils.FeatureChecker;
 
 public class OverviewCapabilities extends BaseCapabilities {
@@ -22,10 +23,10 @@ public class OverviewCapabilities extends BaseCapabilities {
     @Override
     protected void generateCapabilities() {
         addItem(new CapabilitiesItem("Platform", FeatureChecker.getHardware() + ", " + FeatureChecker.getPlatform()));
-        addItem(new CapabilitiesItem("Board", FeatureChecker.getHardwareBoard() + ", " + (FeatureChecker.is64bit() ? "64 bit" : "32 bit")));
+        addItem(new CapabilitiesItem("Board", FeatureChecker.getHardwareBoard()));
+        addItem(new CapabilitiesItem("ABI List", (FeatureChecker.getAbiList())));
         addItem(new CapabilitiesItem("Manufacturer", FeatureChecker.getHardwareManufacturer()));
-        addItem(new CapabilitiesItem("Brand", FeatureChecker.getHardwareBrand()));
-        addItem(new CapabilitiesItem("Product", FeatureChecker.getHardwareProduct()));
+        addItem(new CapabilitiesItem("Brand/Product", FeatureChecker.getHardwareBrand() + ", " + FeatureChecker.getHardwareProduct()));
         addItem(new CapabilitiesItem("Device", FeatureChecker.getHardwareDevice()));
         addItem(new CapabilitiesItem("Model", FeatureChecker.getHardwareModel()));
         addItem(new CapabilitiesItem("Android Version", FeatureChecker.getReleaseVersion() + ", API " + FeatureChecker.getReleaseSDK() + ", " + FeatureChecker.getBuildType()));
@@ -39,7 +40,11 @@ public class OverviewCapabilities extends BaseCapabilities {
     }
 
     private boolean getConfigCameraSoundForced(Context context) {
-        return context.getResources()
-                .getBoolean(com.android.internal.R.bool.config_camera_sound_forced);
+        Resources res = context.getResources();
+        int resourceId = res.getIdentifier("config_camera_sound_forced", "bool", "android");
+        if (resourceId > 0) {
+            return res.getBoolean(resourceId);
+        }
+        return false;
     }
 }

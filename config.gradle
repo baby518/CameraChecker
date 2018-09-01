@@ -1,7 +1,7 @@
 ext {
     buildInfo = [
-            compileSdkVersion: 25,
+            compileSdkVersion: 27,
             minSdkVersion: 24,
-            androidLibraryVersion: "25.4.0",
+            androidLibraryVersion: "27.1.1",
     ]
 }
